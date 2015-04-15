@@ -66,8 +66,8 @@ CONST_RIGHT_90 = -82.0
 
 arduinoSerialPort = serial.Serial('/dev/ttyACM0', 115200)
 switch_input = GPIO.input(17)
-sensor = SensorITG3200(1, 0x68) # update with your bus number and address
-sensor.default_init()
+#sensor = SensorITG3200(1, 0x68) # update with your bus number and address
+#sensor.default_init()
 sensor1 = SensorADXL345(1, 0x53)
 sensor1.default_init()
 time.sleep(2)
@@ -75,13 +75,13 @@ time.sleep(2)
 def getAngle():
     #time.sleep(0.1)
     
-    gx,gy,gz = sensor.read_data()
+   # gx,gy,gz = sensor.read_data()
     time.sleep(0.1)
     ax, ay, az = sensor1.read_data()
     sensor1.standby()
     
     
-    gz/=14.375
+   # gz/=14.375
 	
     ax/=256.0
     ay/=256.0
@@ -90,13 +90,13 @@ def getAngle():
     #print gx, gy, gz
     A=math.sqrt( ax*ax + ay*ay+ az*az)
     while (A == 0):
-        sensor.default_init()
-        sensor1.default_init()
-        gx,gy,gz = sensor.read_data()
+        #sensor.default_init()
+        #sensor1.default_init()
+        #gx,gy,gz = sensor.read_data()
         time.sleep(0.1)
         ax, ay, az = sensor1.read_data()
         sensor1.standby()    
-        gz/=14.375
+        #gz/=14.375
 	ax/=256.0
         ay/=256.0
         az/=256.0
@@ -106,8 +106,8 @@ def getAngle():
     Ay=ay/A
     Az=az/A
     Angle_xy = math.atan2(Ay, Ax)    
-    if abs(gz)>0.5:
-        Angle_xy = Angle_xy + gz*dt*math.pi/180.0
+  #  if abs(gz)>0.5:
+        #Angle_xy = Angle_xy + gz*dt*math.pi/180.0
     if (Angle_xy>math.pi):
         Angle_xy = math.pi
     if (Angle_xy<-math.pi):
