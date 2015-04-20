@@ -183,22 +183,41 @@ while(True):
         state = "initial"
     # initial flag, find the upright direction to start
     if (state == "initial"):
-        if (Angle_xy-angle_Initial<-thre):
-            arduinoSerialPort.write("3") # turn right
-        if (Angle_xy-angle_Initial>thre):
-            arduinoSerialPort.write("4") # turn left
-        if (-thre<Angle_xy-angle_Initial<thre):
-            arduinoSerialPort.write("0")
-            state = "forward"
-            flag=1
-            print "Go"
-            time.sleep(1)
+        if (Angle_xy<=0):
+			angle_Initial=-0.5*math.pi
+			if(Angle_xy>thre+angle_Initial):
+				arduinoSerialPort.write("3") # turn right
+			if(Angle_xy<angle_Initial-thre):
+				 arduinoSerialPort.write("4") # turn left
+			if(angle_Initial-thre<Angle_xy<angle_Initial+thre):
+				arduinoSerialPort.write("0")
+				flag=1
+				state="forward"
+				turn_dir="right"
+				print "Go Right"
+				time.sleep(1)
+				
+       if (Angle_xy>0):
+			angle_Initial=0.5*math.pi
+			if(Angle_xy<angle_Initial-thre):
+				arduinoSerialPort.write("4") # turn left
+			if(angle_Initial+thre<Angle_xy):
+				 arduinoSerialPort.write("3") # turn right
+			if(angle_Initial-thre<Angle_xy<angle_Initial+thre):
+				arduinoSerialPort.write("0")
+				flag=1
+				state="forward"
+				turn_dir="left"
+				print "Go Left"
+				time.sleep(1)
     
     
         
        
     print state,state_1,Angle_xy,sign
     
+###############################################
+#	Side way
 ###############################################
 	
     if (state == "forward"):
@@ -211,33 +230,24 @@ while(True):
             break
         
 			
-		# Maintain the direction when robot move upward
-        if(2*thre < math.fabs (Angle_xy) < 0.5 * math.pi):
-            if (Angle_xy > 0):
-                state_1="left"
-                    
-            else:
-                    
-                state_1="right"
-                    
-        
-		# Maintain the direction when robot move downward
-        if( 0.5*math.pi<math.fabs(Angle_xy)<math.pi-2*thre):
-            sign = math.copysign(1.0, Angle_xy)
-            if (0<Angle_xy-sign*math.pi):
-                state_1="left"
-            else:
-                state_1="right"
+		# Maintain the direction when robot bias to the left
+        if(2*thre < Angle_xy-angle_Initial < 0.5 * math.pi):
+           state_1="right"
+         # Maintain the direction when robot move downward           
+        if (Angle_xy-angle_Initial<-2*thre):
+			state_1="left"
+		
+       
 				
 		#  Deviation to right, need to move left
         if (state_1 == "left"):
             arduinoSerialPort.write("6") # forward left
-            if (0 < Angle_xy < thre or 0 < math.pi-math.fabs(Angle_xy) < thre ):
+            if (-thre<Angle_xy-angle_Initial<0 ):
                 state_1 = "forward"
 		# Deviation to left, need to move right
         if (state_1 == "right"):
             arduinoSerialPort.write("5") # forward right
-            if (-thre < Angle_xy < 0 or 0<math.pi - math.fabs(Angle_xy) < thre):
+            if (0<Angle_xy-angle_Initial<thre):
                 state_1 = "forward"
 		# Go straight
         if (state_1 == "forward"):
@@ -267,13 +277,14 @@ while(True):
 
     if (state == "turn_left"):
         arduinoSerialPort.write("4")
-        if (math.fabs(Angle_xy)>(0.5*math.pi+0.5 *math.pi*short)-thre):
-            
-            if (turnNum == 1):
+        if (turnNum==1):
+            if (-0.5*math.pi-thre<Angle_xy<-0.5*math.pi+thre):
+				angle_Initial=-angle_Initial
                 turnNum = 0
                 state = "forward"
-            else:
-                turnNum = 1
+         elif(turnNum==0):
+			if(math.pi-thre<math.fabs(Angle_xy)):
+				turnNum = 1
                 sf_start_time = curr_time
                 state = "short_forward"
 
@@ -281,16 +292,16 @@ while(True):
 
     if (state == "turn_right"):
         arduinoSerialPort.write("3")
-        if (math.fabs(Angle_xy)<(0.5*math.pi-0.5 *math.pi*short)+thre):
-            
-            if (turnNum == 1):
+        if (turnNum==1):
+            if (0.5*math.pi-thre<Angle_xy<0.5*math.pi+thre):
+				angle_Initial=-angle_Initial
                 turnNum = 0
                 state = "forward"
-		#state = "stop"
-            else:
-                turnNum = 1
+         elif(turnNum==0):
+			if(math.pi-thre<math.fabs(Angle_xy)):
+				turnNum = 1
                 sf_start_time = curr_time
-                state = "short_forward" 
+                state = "short_forward"
 				
 ##############################################
 
